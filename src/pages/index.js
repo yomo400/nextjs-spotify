@@ -1,4 +1,5 @@
 import Head from '@/components/Head'
+import RequestToken from '@/components/RequestToken'
 import Verifier from '@/components/Verifier'
 
 export default function Home() {
@@ -7,6 +8,7 @@ export default function Home() {
       <Head title="Yomo's Spotify" />
       <main>
         <Verifier />
+        <RequestToken />
       </main>
     </>
   )
