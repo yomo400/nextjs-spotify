@@ -5,11 +5,8 @@ import Verifier from '@/components/Verifier'
 export default function Home() {
   return (
     <>
-      <Head title="Yomo's Spotify" />
-      <main>
-        <Verifier />
-        <RequestToken />
-      </main>
+      <Verifier />
+      <RequestToken />
     </>
   )
 }
