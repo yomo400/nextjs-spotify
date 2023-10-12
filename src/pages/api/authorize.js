@@ -17,25 +17,69 @@ export default async function authorize (req, res) {
   }
   let codeVerifier = generateRandomString(128)
 
+  const digest = await window.crypto.subtle.digest('SHA-256', data);
+  async function generateCodeChallenge(codeVerifier) {
+    function base64encode(string) {
+      return btoa(String.fromCharCode.apply(null, new Uint8Array(string)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+    }
+  
+    const encoder = new TextEncoder();
+    const data = encoder.encode(codeVerifier);
+    const digest = await window.crypto.subtle.digest('SHA-256', data);
+  
+    return base64encode(digest);
+  }
+  
+
   const clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
   const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
+  const clientSecret = process.env.NEXT_PUBLIC_CLIENT_SECRET;
 
-  let body = new URLSearchParams({
-    grant_type: 'authorization_code',
-    code: code,
-    redirect_uri: redirectUri,
-    client_id: clientId,
-    code_verifier: codeVerifier
-  });
+  if (state === null) {
+    res.redirect('/#' +
+      querystring.stringify({
+        error: 'state_mismatch'
+      }));
+  } else {
+    let params = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: redirectUri,
+    });
 
-  axios.post('https://accounts.spotify.com/api/token', 
-    {headers: {
-     'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: body
-  })
-    .then((response) => {console.log(response);})
-    .catch((error) => {console.log(error);})
+    try {const response = await axios.post('https://accounts.spotify.com/api/token',
+      params,{
+      headers: {
+        'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64')),
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    })
+    } catch (error) {
+      if (error.response) {
+        // サーバーからのレスポンスが存在する場合、その中に詳細なエラーメッセージが含まれています
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        console.error('Error response headers:', error.response.headers);
+      } else {
+        // サーバーからのレスポンスがない場合、通常はネットワークエラーやリクエストの送信に関する問題です
+        console.error('Network error:', error.message);
+      }
+    }
+  }
+
+  // axios.post('https://accounts.spotify.com/api/token', 
+  //   {
+  //     headers: {
+  //    'Content-Type': 'application/x-www-form-urlencoded',
+  //    'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64'))
+  //   },
+  //   body: body
+  //   })
+  // .then((response) => {console.log(response);})
+  // .catch((error) => {console.log(error);})
 
 //   const response = fetch('https://accounts.spotify.com/api/token', {
 //   method: 'POST',
