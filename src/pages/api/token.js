@@ -1,17 +1,15 @@
-import { useEffect } from 'react';
+import withSession from '@/middleware/session';
 import axios from 'axios';
-import { redirect } from 'next/dist/server/api-utils';
 
 const client_id = process.env.NEXT_PUBLIC_CLIENT_ID;
 const redirect_uri = process.env.NEXT_PUBLIC_REDIRECT_URI;
 const client_secret = process.env.NEXT_PUBLIC_CLIENT_SECRET;
 
-export default async function token(req, res) {
+const handler = async (req, res) => {
   console.log('gettingtoken');
   const getAccessToken = async () => {
     // URLからcodeを取得
     const { code, state } = req.query;
-    console.log('state:' + state);
 
     // トークン取得
     if (code) {
@@ -32,13 +30,13 @@ export default async function token(req, res) {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
         });
-        // クライアントにレスポンスを返す
-        // res.status(200).json({ response: response.data });
+        // セッション
         req.session.set('user', {
-          accessToken: response.data.access_token,
+            accessToken: response.data.access_token,
         });
+        await req.session.save()
         // リダイレクト
-        // res.status(200).redirect('/')
+        res.status(200).redirect('/')
       } catch (error) {
         console.error('Error getting access token:', error);
         res.status(500).json({ error: 'Internal Server Error'})
@@ -46,6 +44,9 @@ export default async function token(req, res) {
     } else {
       res.status(400).json({ error: 'Invalid request' });
     }
+    
   }
   await getAccessToken()
 }
+
+export default withSession(handler);
