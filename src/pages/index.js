@@ -13,12 +13,14 @@ const client_id = process.env.NEXT_PUBLIC_CLIENT_ID;
 const redirect_uri = process.env.NEXT_PUBLIC_REDIRECT_URI;
 const client_secret = process.env.NEXT_PUBLIC_CLIENT_SECRET;
 
+const router = useRouter();
+
+
 export default function Home() {
   const { data, err } = useSWR('/api/hello')
   async function TokenCheck () {
     if (!data) {
       console.log('no data');
-      const router = useRouter();
       console.log('Authorize');
       const redirectUri = `https://accounts.spotify.com/authorize?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=code&scope=user-read-private%20user-read-email&state=state`;
       setTimeout(() => {
