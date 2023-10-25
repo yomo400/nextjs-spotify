@@ -13,7 +13,6 @@ const handler = async (req, res) => {
 
     // トークン取得
     if (code) {
-      console.log('token getting');
       const data = {
         grant_type: 'authorization_code',
         code: code,
