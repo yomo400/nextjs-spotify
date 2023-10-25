@@ -15,7 +15,7 @@ const client_secret = process.env.NEXT_PUBLIC_CLIENT_SECRET;
 
 export default function Home() {
   const { data, err } = useSWR('/api/hello')
-  async function tokenCheck () {
+  async function TokenCheck () {
     if (!data) {
       console.log('no data');
       const router = useRouter();
@@ -28,7 +28,7 @@ export default function Home() {
       console.log(data);
     }
   }
-  tokenCheck()
+  TokenCheck()
   return (
     <div>login...</div>
   );
