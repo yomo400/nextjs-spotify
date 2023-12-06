@@ -34,6 +34,7 @@ const handler = async (req, res) => {
             accessToken: response.data.access_token,
         });
         await req.session.save()
+        console.log('success');
         // リダイレクト
         res.status(200).redirect('/')
       } catch (error) {
